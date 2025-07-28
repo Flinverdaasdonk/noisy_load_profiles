@@ -27,7 +27,7 @@ class Pipeline:
         self._is_applied = False
 
 
-    def perturb(self, profiles: np.ndarray) -> np.ndarray:
+    def apply(self, profiles: np.ndarray) -> np.ndarray:
         """
         Apply all perturbations sequentially to the input profiles.
         
@@ -56,7 +56,7 @@ class Pipeline:
         self._is_applied = True
         return current_profiles
     
-    def track_perturbations(self, track: bool = True) -> None:
+    def track_perturbation_process(self, track: bool = True) -> None:
         """
         Enable or disable tracking of input profiles for each perturbation.
         
