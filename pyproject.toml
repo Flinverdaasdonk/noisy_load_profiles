@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "noisy-load-profiles"
+version = "0.1.0"
+description = "A Python package for adding realistic noise to electrical load or current profiles. Useful for studying robustness to noise of algorithms"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Flin Verdaasdonk", email = "flin.verdaasdonk@gmail.com"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.20.0",
+]
+
+# Optional: Add classifiers later
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+]
+
+# Optional: Add these when you need them
+[project.optional-dependencies]
+dev = [
+]
+
+[project.urls]
+Homepage = "https://github.com/flinverdaasdonk/noisy-load-profiles"
+Repository = "https://github.com/flinverdaasdonk/noisy-load-profiles"
