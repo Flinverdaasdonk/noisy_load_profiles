@@ -157,7 +157,7 @@ class ConstantRandomPercentualScaling(Perturbation):
         
         transformation = {
             'scaling': base_scaling,
-            'shape': biases.shape,
+            'shape': base_scaling.shape,
             'uniform_low': self.uniform_low,
             'uniform_high': self.uniform_high}
 
@@ -187,3 +187,88 @@ class ConstantRandomPercentualScaling(Perturbation):
         
         return perturbed_profiles
     
+
+class DiscreteTimeShift(Perturbation):
+    """
+    For each column, randomly shift values forward or backward by a random amount.
+    The shift amount is uniformly sampled between shift_amount_lower_limit and shift_amount_upper_limit.
+    The shift is applied with a given probability (shift_chance).
+    If shifted, the values that were shifted away from are replaced with the closest known value.
+    E.g. if we have [a, b, c, d, e, f, g] and we shift it with -2, we get [c, d, e, f, g, ?, ?], 
+    and the question marks are replaced with the last value of the column, resulting in [c, d, e, f, g, g, g] 
+
+    Stored transformation
+    ---------------------
+    {
+        "do_shift": np.ndarray bool (C,),
+        "shift_amounts": np.ndarray int (C,),
+    }
+    """
+
+    def __init__(self, shift_chance: float, shift_amount_lower_limit: int, shift_amount_upper_limit: int, seed: Optional[int] = None, transformation: Optional[Dict[str, Any]] = None, track_input_profiles: bool = False):
+        super().__init__(seed=seed, transformation=transformation, track_input_profiles=track_input_profiles)
+
+        self.shift_chance = shift_chance
+        if not (0.0 <= self.shift_chance <= 1.0):
+            raise ValueError("shift_chance must be in [0, 1]")
+
+        self.shift_amount_lower_limit = shift_amount_lower_limit
+        self.shift_amount_upper_limit = shift_amount_upper_limit
+
+        if not isinstance(self.shift_amount_lower_limit, int) or not isinstance(self.shift_amount_upper_limit, int):
+            raise TypeError(f"shift_amount_lower_limit and shift_amount_upper_limit must be integers, {shift_amount_lower_limit} and {shift_amount_upper_limit} provided")
+
+        if self.shift_amount_lower_limit > self.shift_amount_upper_limit:
+            raise ValueError(f"shift_amount_lower_limit ({shift_amount_lower_limit}) must be less than or equal to shift_amount_upper_limit ({shift_amount_upper_limit})")
+
+        self._config = {shift_chance: self.shift_chance,
+                        'shift_amount_lower_limit': self.shift_amount_lower_limit,
+                        'shift_amount_upper_limit': self.shift_amount_upper_limit}
+
+
+    def _infer_transformation(self, profiles: np.ndarray) -> Dict[str, Any]:
+
+        t_steps, n_cols = profiles.shape
+
+        # uniform random sampling between 0 and 1 to assess shift chance
+        do_shift = np.random.uniform(0, 1, size=n_cols) <= self.shift_chance
+
+        shift_amounts = np.random.randint(self.shift_amount_lower_limit, self.shift_amount_upper_limit + 1, size=n_cols)
+
+        # mask shift_amounts with do_shift
+        shift_amounts[~do_shift] = 0
+
+        transformation = {
+            "do_shift": do_shift,
+            "shift_amounts": shift_amounts,
+        }
+        return transformation
+
+    def _apply_perturbation(self, profiles: np.ndarray) -> np.ndarray:
+
+        t_steps, n_cols = profiles.shape
+        do_shift = self._transformation["do_shift"]
+        shift_amounts = self._transformation["shift_amounts"]
+
+        new_profiles = profiles.copy()
+
+        for col in range(n_cols):
+            if do_shift[col]:
+                shift_amount = shift_amounts[col]
+                if shift_amount == 0:
+                    # nothing to do
+                    continue
+
+                # roll the column values
+                new_profiles[:, col] = np.roll(profiles[:, col], shift=shift_amount)
+
+                if shift_amount > 0:
+                    # if shift is positive, set the first `shift_amount` values the first value of the column
+                    new_profiles[:shift_amount, col] = new_profiles[shift_amount, col] 
+
+                else:
+                    # if shift is negative, set the last `shift_amount` values to the last value of the column
+                    new_profiles[shift_amount:, col] = new_profiles[shift_amount, col]
+
+                
+        return new_profiles

@@ -1,6 +1,6 @@
 from .random import MultiplicativeGaussianNoise, AdditiveOUNoise
-from .systematic import ConstantRandomPercentualBias, ConstantRandomPercentualScaling
-from .measurement import ZeroMeasurements,PercentualDeadBand, DiscreteTimeShift
+from .systematic import ConstantRandomPercentualBias, ConstantRandomPercentualScaling, DiscreteTimeShift
+from .measurement import ZeroMeasurements,PercentualDeadBand
 
 
 __all__ = [
@@ -11,9 +11,9 @@ __all__ = [
     # systematic
     'ConstantRandomPercentualBias',
     "ConstantRandomPercentualScaling"
+    "DiscreteTimeShift"
 
     # measurement
     "ZeroMeasurements",
     "PercentualDeadBand",
-    "DiscreteTimeShift"
 ]
