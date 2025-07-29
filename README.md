@@ -10,14 +10,13 @@ The overal approach is as follows:
 Note, the package expects `profiles` as a 2D array (timesteps X measurement devices)
 
 ## Examples
-We have examples that demonstrate basic usage, advanced usage, and how to construct new Perturbations on our github.
+On our [Github](https://github.com/Flinverdaasdonk/noisy_load_profiles) We have examples that demonstrate basic usage, advanced usage, and how to construct new Perturbations.
 
 Below we show the most barebones example of a pipeline applying two types of noise.
 
 ```
-import noisy_load_profiles as nolp
+from noisy_load_profiles import Pipeline, perturbations
 import numpy as np
-
 
 
 # initialize some profiles
@@ -27,11 +26,11 @@ profiles = np.ones((timesteps, n_profiles)) # 2 profiles with 10 timesteps each;
 
 
 # Initialize some pertubations
-gaussian_noise = nolp.perturbations.MultiplicativeGaussianNoise(mean=0.0, std=0.01, seed=42)
-deadband = nolp.perturbations.PercentualDeadBand(seed=42)
+gaussian_noise = perturbations.MultiplicativeGaussianNoise(mean=0.0, std=0.01, seed=42)
+deadband = perturbations.PercentualDeadBand(seed=42)
 
 # construct the pipeline
-pipeline = nolp.Pipeline([gaussian_noise, deadband])
+pipeline = Pipeline([gaussian_noise, deadband])
 
 
 # apply the perturbation to the profiles
