@@ -5,7 +5,10 @@ build/
 dist/
 wheels/
 *.egg-info
-scraps/
+
 
 # Virtual environments
 .venv
+
+# private directories
+scraps/
