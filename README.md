@@ -16,8 +16,6 @@ Below we show the most barebones example of a pipeline applying two types of noi
 
 ```
 import noisy_load_profiles as nolp
-from noisy_load_profiles import Pipeline
-from noisy_load_profiles.perturbations import MultiplicativeGaussianNoise, ZeroMeasurements
 import numpy as np
 
 
@@ -29,11 +27,11 @@ profiles = np.ones((timesteps, n_profiles)) # 2 profiles with 10 timesteps each;
 
 
 # Initialize some pertubations
-gaussian_noise = MultiplicativeGaussianNoise(mean=0.0, std=0.01, seed=42)
+gaussian_noise = nolp.perturbations.MultiplicativeGaussianNoise(mean=0.0, std=0.01, seed=42)
 deadband = nolp.perturbations.PercentualDeadBand(seed=42)
 
 # construct the pipeline
-pipeline = Pipeline([gaussian_noise, deadband])
+pipeline = nolp.Pipeline([gaussian_noise, deadband])
 
 
 # apply the perturbation to the profiles
