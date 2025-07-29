@@ -9,6 +9,9 @@ The overal approach is as follows:
 
 Note, the package expects `profiles` as a 2D array (timesteps X measurement devices)
 
+## Install
+`pip install noisy_load_profiles`
+
 ## Examples
 On our [Github](https://github.com/Flinverdaasdonk/noisy_load_profiles) We have examples that demonstrate basic usage, advanced usage, and how to construct new Perturbations.
 
