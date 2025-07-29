@@ -1,9 +1,9 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "noisy-load-profiles"
+name = "noisy_load_profiles"
 version = "0.1.0"
 description = "A Python package for adding realistic noise to electrical load or current profiles. Useful for studying robustness to noise of algorithms"
 readme = "README.md"
@@ -29,5 +29,5 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/flinverdaasdonk/noisy-load-profiles"
-Repository = "https://github.com/flinverdaasdonk/noisy-load-profiles"
+Homepage = "https://github.com/flinverdaasdonk/noisy_load_profiles"
+Repository = "https://github.com/flinverdaasdonk/noisy_load_profiles"
