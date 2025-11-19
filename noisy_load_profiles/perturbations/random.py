@@ -3,19 +3,23 @@ from typing import Dict, Any, Optional, List
 from ..base import Perturbation
 import copy
 
-class MultiplicativeGaussianNoise(Perturbation):
+class GaussianNoise(Perturbation):
     """
-    Applies multiplicative Gaussian noise to load profiles.
-    
-    The perturbation multiplies each profile by (1 + noise) where noise is
-    sampled from a Gaussian distribution with specified mean and standard deviation.
-    
-    Formula: perturbed_profile = profile * (1 + gaussian_noise)
+    Applies Gaussian noise to load profiles. 
+    For each column and timestep, it samples noise from a Gaussian distribution with specified mean and standard deviation,
+    and it applies this to the profiles.
+    This can be either additive or multiplicative noise.
+    additive: perturbed_profile = profile + noise
+    multiplicative: perturbed_profile = profile * (1 + noise)
     """
     
-    def __init__(self, mean: float = 0.0, std: float = 0.01, 
-                 seed: Optional[int] = None, transformation: Optional[Dict[str, Any]] = None,
-                 track_input_profiles: bool = False):
+    def __init__(self, 
+                mean: float = 0.0, 
+                std: float = 0.01, 
+                method: str = 'multiplicative', # 'multiplicative' or 'additive'
+                seed: Optional[int] = None,
+                transformation: Optional[Dict[str, Any]] = None,
+                track_input_profiles: bool = False):
         """
         Initialize the MultiplicativeGaussianNoise perturbation.
         
@@ -34,11 +38,13 @@ class MultiplicativeGaussianNoise(Perturbation):
         
         self.mean = mean
         self.std = std
+        self.method = method.lower()
         
         # Store configuration
         self._config = {
             'mean': mean,
-            'std': std
+            'std': std,
+            'method': self.method
         }
         
         # Validate parameters
@@ -61,6 +67,7 @@ class MultiplicativeGaussianNoise(Perturbation):
             'noise_samples': noise_samples,
             'mean': self.mean,
             'std': self.std,
+            'method': self.method,
             'shape': profiles.shape
         }
         return transformation
@@ -88,7 +95,13 @@ class MultiplicativeGaussianNoise(Perturbation):
         
         # Apply multiplicative noise: profiles * (1 + noise)
         noise_samples = self._transformation['noise_samples']
-        perturbed_profiles = profiles * (1 + noise_samples)
+
+        if self.method == 'additive':
+            perturbed_profiles = profiles + noise_samples
+        elif self.method == 'multiplicative':
+            perturbed_profiles = profiles * (1 + noise_samples)
+        else:
+            raise ValueError(f"Unknown method '{self.method}'. Use 'additive' or 'multiplicative'.")
         
         return perturbed_profiles
     
@@ -97,10 +110,14 @@ class MultiplicativeGaussianNoise(Perturbation):
 
 
 
-class AdditiveOUNoise(Perturbation):
+class OUNoise(Perturbation):
     """
-    Adds additive Ornstein–Uhlenbeck (OU) noise to each column.
+    Applies Ornstein–Uhlenbeck (OU) noise to each column.
     Put simply, OU noise is like a random walk that has a tendency to revert to a mean value (mu) over time.
+
+    Noise can be applied additively or multiplicatively to the profiles.
+    Additive: perturbed_profile = profile + noise
+    Multiplicative: perturbed_profile = profile * (1 + noise)
 
     Discrete update (Euler–Maruyama):
         x[t+1] = x[t] + theta * (mu - x[t]) * dt + sigma_eff[c] * sqrt(dt) * N(0,1)
@@ -116,6 +133,7 @@ class AdditiveOUNoise(Perturbation):
         mu: float = 0.0,
         sigma: float = 0.05,          # fraction of mean(|column|)
         dt: float = 1.0,
+        method: str = 'additive',  # 'additive' or 'multiplicative'
         per_column_independent: bool = True,
         eps_scale: float = 1e-12,
         seed: Optional[int] = None,
@@ -139,6 +157,7 @@ class AdditiveOUNoise(Perturbation):
         self.dt = float(dt)
         self.per_column_independent = per_column_independent
         self.eps_scale = float(eps_scale)
+        self.method = method.lower()
 
         self._config = {
             "theta": self.theta,
@@ -147,6 +166,7 @@ class AdditiveOUNoise(Perturbation):
             "dt": self.dt,
             "per_column_independent": self.per_column_independent,
             "eps_scale": self.eps_scale,
+            "method": self.method,
         }
 
     # -------- required abstract-method implementations --------
@@ -185,6 +205,7 @@ class AdditiveOUNoise(Perturbation):
             "sigma_eff": sigma_eff,
             "shape": (t_steps, n_cols),
             "per_column_independent": self.per_column_independent,
+            "method": self.method,
             "summary": summary,
         }
         return transformation
@@ -193,8 +214,15 @@ class AdditiveOUNoise(Perturbation):
         noise = self._transformation["noise"]
         if noise.shape != profiles.shape:
             raise ValueError(f"Stored noise shape {noise.shape} does not match profiles shape {profiles.shape}")
-        return profiles + noise
 
+        if self.method == 'multiplicative':
+            perturbed_profiles = profiles * (1 + noise)
+        elif self.method == 'additive':
+            perturbed_profiles = profiles + noise
+        else:
+            raise ValueError(f"Unknown method '{self.method}'. Use 'additive' or 'multiplicative'.")
+        
+        return perturbed_profiles
     # -------- helpers --------
 
     @staticmethod

@@ -9,11 +9,9 @@ class ZeroMeasurements(Perturbation):
     """
     Put Simply, this sometimes sets a measurements to zero, simulating an outage or a measurement error.
 
-    This is done using a 2-state Markov Model
-
-    States:
-        0 = normal
-        1 = zero/outage
+    This is done using a 2-state Markov Model, with states 0 = normal and 1 = zero/outage. 
+    If the MM is in state 0, there is a probability alpha of transitioning to state 1 in the next time step.
+    If the MM is in state 1, there is a probability beta of transitioning back to state 0 in the next time step.
 
     Parameters
     ----------

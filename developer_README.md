@@ -13,5 +13,5 @@ Overview to upload new versions:
 - Change the version number in the .toml
 - remove the dist folder
 - run `python -m build`
-- run `twine upload dist/*` (you need to done `pip install twine` in this environment)
+- run `twine upload dist/*` (you need to have done `pip install twine` in this environment)
 - When twine asks for the API key, ctrl+c and than rightclick to add the API key that starts with pypi-...

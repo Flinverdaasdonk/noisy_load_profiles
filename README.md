@@ -29,7 +29,7 @@ profiles = np.ones((timesteps, n_profiles)) # 2 profiles with 10 timesteps each;
 
 
 # Initialize some pertubations
-gaussian_noise = perturbations.MultiplicativeGaussianNoise(mean=0.0, std=0.01, seed=42)
+gaussian_noise = perturbations.GaussianNoise(mean=0.0, std=0.01, seed=42)
 deadband = perturbations.PercentualDeadBand(seed=42)
 
 # construct the pipeline
