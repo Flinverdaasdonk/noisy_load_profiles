@@ -26,6 +26,7 @@ class Pipeline:
         self.perturbations = perturbations
         self._is_applied = False
 
+        self.seed = seed
         if seed is not None:
             self.set_seed(seed)
 
@@ -106,10 +107,23 @@ class Pipeline:
         """
         return {p: p.config for p in self.perturbations}
     
-    def reset(self) -> None:
+    def reset(self, increment_seed=True) -> None:
         """Reset all perturbations in the pipeline."""
+        if increment_seed:
+
+            if self.seed is not None:
+                self.seed += 1
+                self.set_seed(self.seed, reset=False)
+            
+            else:
+                # get the current seeds and increment them by 1
+                for perturbation in self.perturbations:
+                    if perturbation.seed is not None:
+                        perturbation.set_seed(perturbation.seed + 1, reset=False)
+
         for perturbation in self.perturbations:
             perturbation.reset()
+            
         self._is_applied = False
         
     def set_seed(self, seed: int, reset=True) -> None:

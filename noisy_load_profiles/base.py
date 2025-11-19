@@ -162,7 +162,7 @@ class Perturbation(ABC):
         # Re-set seed if it was provided
         self.set_seed(self.seed)
     
-    def set_seed(self, seed: int) -> None:
+    def set_seed(self, seed: int, reset=True) -> None:
         """
         Set or change the random seed.
         
@@ -176,6 +176,9 @@ class Perturbation(ABC):
 
         self.seed = seed
         np.random.seed(seed)
+
+        if reset:
+            self.reset()
     
     def __repr__(self) -> str:
         """String representation of the perturbation."""
