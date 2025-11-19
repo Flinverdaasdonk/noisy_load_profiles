@@ -21,7 +21,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering",
-]
+] 
 
 # Optional: Add these when you need them
 [project.optional-dependencies]

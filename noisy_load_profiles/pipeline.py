@@ -23,7 +23,7 @@ class Pipeline:
         if not perturbations:
             raise ValueError("Pipeline must contain at least one perturbation")
         
-        self.perturbations = perturbations
+        self._perturbations = perturbations
         self._is_applied = False
 
         self.seed = seed
@@ -50,7 +50,7 @@ class Pipeline:
         # Apply perturbations sequentially
         current_profiles = profiles.copy()
         
-        for i, perturbation in enumerate(self.perturbations):
+        for i, perturbation in enumerate(self._perturbations):
             try:
                 current_profiles = perturbation.apply(current_profiles)
             except Exception as e:
@@ -68,7 +68,7 @@ class Pipeline:
         track : bool, default=True
             If True, each perturbation will store the input profiles it receives
         """
-        for perturbation in self.perturbations:
+        for perturbation in self._perturbations:
             perturbation.track_input_profiles = track
 
     def _validate_input(self, profiles: np.ndarray) -> None:
@@ -92,9 +92,9 @@ class Pipeline:
             List of transformation dictionaries, one for each perturbation
         """
         if not self._is_applied:
-            return [None] * len(self.perturbations)
+            return [None] * len(self._perturbations)
         
-        return {p: p.get_transformation() for p in self.perturbations}
+        return {p: p.get_transformation() for p in self._perturbations}
     
     def get_configs(self) -> List[Dict[str, Any]]:
         """
@@ -105,7 +105,7 @@ class Pipeline:
         List[Dict[str, Any]]
             List of configuration dictionaries, one for each perturbation
         """
-        return {p: p.config for p in self.perturbations}
+        return {p: p.config for p in self._perturbations}
     
     def reset(self, increment_seed=True) -> None:
         """Reset all perturbations in the pipeline."""
@@ -117,13 +117,13 @@ class Pipeline:
             
             else:
                 # get the current seeds and increment them by 1
-                for perturbation in self.perturbations:
+                for perturbation in self._perturbations:
                     if perturbation.seed is not None:
                         perturbation.set_seed(perturbation.seed + 1, reset=False)
 
-        for perturbation in self.perturbations:
+        for perturbation in self._perturbations:
             perturbation.reset()
-            
+
         self._is_applied = False
         
     def set_seed(self, seed: int, reset=True) -> None:
@@ -131,20 +131,20 @@ class Pipeline:
         if reset:
             self.reset()
 
-        for perturbation in self.perturbations:
+        for perturbation in self._perturbations:
             perturbation.set_seed(seed)
     
     def __len__(self) -> int:
         """Return the number of perturbations in the pipeline."""
-        return len(self.perturbations)
+        return len(self._perturbations)
     
     def __getitem__(self, index: int) -> 'Perturbation':
         """Get a perturbation by index."""
-        return self.perturbations[index]
+        return self._perturbations[index]
     
     def __repr__(self) -> str:
         """String representation of the pipeline."""
-        perturbation_names = ["\t" + repr(p) + "\n" for p in self.perturbations] 
+        perturbation_names = ["\t" + repr(p) + "\n" for p in self._perturbations] 
         return f"Pipeline(\n" + "".join(perturbation_names) + ")"
     
     @property
@@ -159,7 +159,11 @@ class Pipeline:
         """
         return {
             'perturbations': self.get_configs(),
-            'num_perturbations': len(self.perturbations)
+            'num_perturbations': len(self._perturbations)
         }
 
+    @property
+    def perturbations(self) -> List['Perturbation']:
+        """Get the list of perturbations in the pipeline."""
+        return self._perturbations
 
