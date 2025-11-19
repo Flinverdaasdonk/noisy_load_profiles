@@ -160,7 +160,7 @@ class Perturbation(ABC):
         self._is_applied = False
         
         # Re-set seed if it was provided
-        self.set_seed(self.seed)
+        self.set_seed(self.seed, reset=False)
     
     def set_seed(self, seed: int, reset=True) -> None:
         """
